@@ -19,6 +19,7 @@ import {
 import { checkUser } from '@/lib/checkUser';
 
 async function Header() {
+	//checking if user is signed in
 	await checkUser();
 	return (
 		<header
