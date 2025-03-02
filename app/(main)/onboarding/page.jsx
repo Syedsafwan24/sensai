@@ -1,8 +1,11 @@
+import { industries } from '@/data/industries';
+import OnboardingForm from './_components/onboarding-form';
+
 function page() {
 	return (
-		<div>
-			<h1>Onboarding</h1>
-		</div>
+		<main>
+			<OnboardingForm industries={industries} />
+		</main>
 	);
 }
 
