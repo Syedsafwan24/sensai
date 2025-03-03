@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/prisma';
-import { auth } from '@clerk/nextjs/dist/types/server';
+import { auth } from '@clerk/nextjs/server';
 
 export async function updateUser(data) {
 	const { userId } = await auth();
@@ -40,6 +40,20 @@ export async function updateUser(data) {
 						},
 					});
 				}
+
+				const updatedUser = await tx.user.update({
+					where: {
+						id: user.id,
+					},
+					data: {
+						industry: data.industry,
+						experience: data.experience,
+						bio: data.bio,
+						skills: data.skills,
+					},
+				});
+
+				return { updatedUser, industryInsight };
 			},
 			{
 				timeout: 10000,
@@ -51,6 +65,34 @@ export async function updateUser(data) {
 		console.error('Error updating user', error.message);
 		throw new Error('Error updating user');
 	}
+}
 
-	return <div></div>;
+export async function getUserOnBoardingStatus() {
+	const { userId } = await auth();
+	if (!userId) throw new Error('User not found');
+
+	const user = await db.user.findUnique({
+		where: {
+			clerkUserId: userId,
+		},
+	});
+	if (!user) throw new Error('User not found');
+
+	try {
+		const user = await db.user.findUnique({
+			where: {
+				clerkUserId: userId,
+			},
+			select: {
+				industry: true,
+			},
+		});
+
+		return {
+			isOnboarded: !!user.industry,
+		};
+	} catch (error) {
+		console.error('Error getting user onboarding status', error.message);
+		throw new Error('Error getting user onboarding status');
+	}
 }

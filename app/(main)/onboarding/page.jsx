@@ -1,7 +1,13 @@
 import { industries } from '@/data/industries';
 import OnboardingForm from './_components/onboarding-form';
+import { getUserOnBoardingStatus } from '@/actions/user';
+import { redirect } from 'next/navigation';
 
-function page() {
+async function Onboardingpage() {
+	const { isOnboarded } = await getUserOnBoardingStatus();
+	if (isOnboarded) {
+		redirect('/dashboard');
+	}
 	return (
 		<main>
 			<OnboardingForm industries={industries} />
@@ -9,4 +15,4 @@ function page() {
 	);
 }
 
-export default page;
+export default Onboardingpage;
