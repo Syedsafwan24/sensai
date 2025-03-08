@@ -31,12 +31,12 @@ export async function updateUser(data) {
 							industry: data.industry,
 							salaryRanges: [],
 							growthRate: 0,
-							demandLevel: 'Medium',
+							demandLevel: 'MEDIUM',
 							topSkills: [],
-							marketOutlook: 'neutral',
+							marketOutlook: 'NEUTRAL',
 							keyTrends: [],
 							recommendedSkills: [],
-							nextUpdate: new Date(Date.now() + 7 * 24`*60*60*1000)`),
+							nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 						},
 					});
 				}
@@ -60,10 +60,10 @@ export async function updateUser(data) {
 			}
 		);
 
-		return result.user;
+		return { success: true, ...result };
 	} catch (error) {
 		console.error('Error updating user', error.message);
-		throw new Error('Error updating user');
+		throw new Error('Error updating user' + error.message);
 	}
 }
 

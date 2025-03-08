@@ -1,5 +1,6 @@
 'use client';
 
+import { updateUser } from '@/actions/user';
 import { onboardingSchema } from '@/app/lib/schema';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,15 +20,24 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import useFetch from '@/hooks/use-fetch';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 function OnboardingForm({ industries }) {
 	const [selectedIndustry, setSelectedIndustry] = useState(null);
 
 	const router = useRouter();
+
+	const {
+		loading: updateLoading,
+		fn: updateUserFn,
+		data: updateResult,
+	} = useFetch(updateUser);
 
 	const {
 		register,
@@ -41,8 +51,26 @@ function OnboardingForm({ industries }) {
 
 	const watchIndustry = watch('industry');
 	async function onSubmit(values) {
-		console.log(values);
+		try {
+			const formattedIndustry = `${values.industry}-${values.subIndustry
+				.toLowerCase()
+				.replace(/ /g, '-')}`;
+			await updateUserFn({
+				...values,
+				industry: formattedIndustry,
+			});
+		} catch (e) {
+			console.log('onboarding error: ', e);
+		}
 	}
+
+	useEffect(() => {
+		if (updateResult?.success && !updateLoading) {
+			toast.success('Profile updated successfully');
+			router.push('/dashboard');
+			router.refresh();
+		}
+	}, [updateResult, updateLoading]);
 
 	return (
 		<div className='flex items-center justify-center bg-background'>
@@ -161,8 +189,15 @@ function OnboardingForm({ industries }) {
 								<p className='text-red-500 text-sm'>{errors.bio.message}</p>
 							)}
 						</div>
-						<Button type='submit' className='w-full'>
-							Complete Profile
+						<Button type='submit' className='w-full' disabled={updateLoading}>
+							{updateLoading ? (
+								<>
+									<Loader2 className='mr-2 h-4 w-4 animate-spin' />
+									Saving...
+								</>
+							) : (
+								'Complete Profile'
+							)}
 						</Button>
 					</form>
 				</CardContent>
